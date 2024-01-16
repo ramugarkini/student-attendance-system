@@ -31,6 +31,18 @@
 </div>
 
 <div class="card-body">
+  {% if form.errors %}
+    <h5 class="text-danger" style="font-weight: bold;">Errors in form submission</h5>
+    <ul class="errorlist">
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <li class="text-danger">{{ field|title }}: {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+    <hr>
+  {% endif %}
+
 <!-- Container for Student Photo and Details -->
 <form method="post" action="{% if student.id %}{% url 'student_edit' student_id=student.id %}{% endif %}" data-student-id="{{ student.id }}" enctype="multipart/form-data" id="captureForm" style="flex-grow: 1;">
 
@@ -92,13 +104,6 @@
 
           <label for="id_email" style="font-weight: bold;">Remarks:</label>
           <textarea name="remarks" id="id_remarks" value="{{ student.remarks }}" class="form-control"></textarea>
-
-          <!-- Display Errors if Any -->
-          {% if request.method == 'POST' %}
-            {% if form.errors %}
-              <p class="text-danger">There were errors in the form submission.</p>
-            {% endif %}
-          {% endif %}
 
           <!-- Save/Update, Delete, and Cancel Buttons -->
           <div class="button-row mt-3">

@@ -5,7 +5,7 @@ from masters.models import Departments, EnrollmentYears, Sections
 class Students(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    roll_number = models.CharField(max_length=15)
+    roll_number = models.CharField(max_length=15, unique=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE)
     section = models.ForeignKey(Sections, on_delete=models.CASCADE)
     enrollment_year = models.ForeignKey(EnrollmentYears, on_delete=models.CASCADE)
