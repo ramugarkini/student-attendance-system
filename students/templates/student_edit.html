@@ -1,0 +1,276 @@
+<!-- students/templates/student_edit.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if student.id %} Edit Student
+   {% else %} New Student
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+  <div class="card-header">
+<!-- Header Section -->
+   <div class="header d-flex justify-content-between align-items-center">
+    <a href="{% url 'students' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+
+
+    <h3 class="m-0 font-weight-bold text-primary">
+       {% if student.id %} Student: {{ student.name }}
+       {% else %} New Student
+       {% endif %}
+    </h3>
+
+    <div class="d-flex">
+       <!-- New Student Button -->
+       <a href="{% url 'student_edit' student_id=0 %}" class="ml-auto">
+          <button type="button" class="btn btn-success">New Student</button>
+       </a>
+    </div>
+   </div>
+</div>
+
+<div class="card-body">
+<!-- Container for Student Photo and Details -->
+<form method="post" action="{% if student.id %}{% url 'student_edit' student_id=student.id %}{% endif %}" data-student-id="{{ student.id }}" enctype="multipart/form-data" id="captureForm" style="flex-grow: 1;">
+
+  {% csrf_token %}
+  
+  <div class="student-container" style="display: flex;">
+      <div class="col-md-4" style="width: 35%; display: flex; flex-direction: column;">
+          <!-- Student Information Fields -->
+          <div class="row mb-2">
+            <div class="col-md-6">
+              <label for="id_name" style="font-weight: bold;">Student Name:</label>
+              <input type="text" name="name" id="id_name" value="{{ student.name }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+              <label for="id_roll_number" style="font-weight: bold;">Roll Number:</label>
+              <input type="text" name="roll_number" id="id_roll_number" value="{{ student.roll_number }}" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-6">
+              <label for="id_department" style="font-weight: bold;">Department:</label>
+              <select name="department" id="id_department" class="form-control" required>
+                <!-- Add options for departments here -->
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="id_section" style="font-weight: bold;">Section:</label>
+              <select name="section" id="id_section" class="form-control" required>
+                <!-- Add options for departments here -->
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-12">
+              <label for="id_enrollment_year" style="font-weight: bold;">Enrollment Year:</label>
+              <select name="enrollment_year" id="id_enrollment_year" class="form-control" required>
+                <!-- Add options for departments here -->
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-12">
+              <label for="id_mobile_number" style="font-weight: bold;">Mobile Number:</label>
+              <input type="text" name="mobile_no" id="id_mobile_no" value="{{ student.mobile_no|default:'' }}" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col-md-12">
+              <label for="id_email" style="font-weight: bold;">Email:</label>
+              <input type="email" name="email" id="id_email" value="{{ student.email|default:'' }}" class="form-control" required>
+            </div>
+          </div>
+
+          <label for="id_email" style="font-weight: bold;">Remarks:</label>
+          <textarea name="remarks" id="id_remarks" value="{{ student.remarks }}" class="form-control"></textarea>
+
+          <!-- Display Errors if Any -->
+          {% if request.method == 'POST' %}
+            {% if form.errors %}
+              <p class="text-danger">There were errors in the form submission.</p>
+            {% endif %}
+          {% endif %}
+
+          <!-- Save/Update, Delete, and Cancel Buttons -->
+          <div class="button-row mt-3">
+            <button id="updateButton" type="submit" class="btn btn-success">{% if student.id %}Update{% else %}Save{% endif %}</button>
+            <a href="{% url 'students' %}" class="btn btn-secondary ml-2">Cancel</a>
+            {% if student.id %}
+              <button type="submit" name="delete" class="btn btn-danger ml-2 float-right" onclick="return confirm('Are you sure to delete?')">Delete</button>
+            {% endif %}
+          </div>
+
+      </div>
+
+
+      <!-- <div style="width: 5%;"></div> -->
+
+      <div class="col-md-8 image-cell" style="display: flex; flex-direction: column;">
+        <label for="id_image" style="font-weight: bold;">Image:</label>
+        <input type="hidden" id="image_data" name="image_data" value="{{ student.image_data }}">
+        <img id="captured_image" src="{% if student.image %}{{ student.image.url }}{% else %}{{ '/media/images/students/image.jpeg' }}{% endif %}" alt="Student Image" style="max-width: 100%; flex-grow: 1;">
+        
+        <video id="video" width="640" height="480" autoplay></video>
+        <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+        <div>
+          <button id="capture" class="btn btn-primary">Capture</button>
+          <button id="remove_image" class="btn btn-danger float-right">Remove Image</button>
+          <input type="hidden" id="remove_image_data" name="remove_image_data" value="{{ student.remove_image_data }}">
+        </div>
+      </div>
+
+  </div>
+</form>
+</div>
+
+
+
+<!-- JavaScript Section for Capturing Image -->
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d'); 
+  const captureButton = document.getElementById('capture');
+  const removeImageButton = document.getElementById('remove_image');
+  const imageDataInput = document.getElementById('image_data');
+  const removeImageData = document.getElementById('remove_image_data');
+  const capturedImage = document.getElementById('captured_image');
+  const form = document.getElementById('captureForm');
+  let isCameraOn = false; // Track the camera state
+
+  capturedImage.style.display = 'block';
+  video.style.display = 'none';
+
+  // Function to start or stop the camera stream
+  function toggleCamera() {
+    if (!isCameraOn) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error('Error accessing camera:', error);
+        });
+        removeImageButton.style.display = 'none';
+
+        capturedImage.style.display = 'none';
+        video.style.display = 'block';
+    } else {
+      // Stop the camera stream
+      const tracks = video.srcObject.getTracks();
+      tracks.forEach(track => track.stop());
+      video.srcObject = null;
+      
+      removeImageButton.style.display = 'block';
+
+      capturedImage.style.display = 'block';
+      video.style.display = 'none';
+    }
+
+    // Toggle the camera state
+    isCameraOn = !isCameraOn;
+  }
+
+  captureButton.addEventListener('click', (event) => {
+    event.preventDefault();  // Prevent the default form submission behavior
+
+    // Draw the current video frame onto the canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert the canvas content to a data URL (base64-encoded image)
+    const imageData = canvas.toDataURL('image/jpeg');
+
+    if (isCameraOn){
+      // Set the value of the hidden input field to the captured image data
+      imageDataInput.value = imageData;
+
+      // Display the captured image on the page
+      capturedImage.src = imageData;
+
+      removeImageData.value = true;
+    }
+
+    // Update the form action based on the existence of student.id
+    const studentId = form.dataset.studentId;
+    const url = studentId ? form.action : form.dataset.editUrl;
+
+    function getCSRFToken() {
+      const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        .split('=')[1];
+
+      return cookieValue;
+    }
+
+    // Submit the form via AJAX
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ image_data: imageData }),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+    })
+    .then(response => response.text())
+    .then(data => {
+      console.log('Response received:', data);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
+    toggleCamera();
+  });
+
+  // Add event listener for Remove Image button
+  removeImageButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    imageDataInput.value = '';
+    removeImageData.value = true;
+    capturedImage.src = "/media/images/students/image.jpeg";
+  });
+
+  function fetchDataAndPopulateSelect(url, selectId, optionTextCallback, fieldId) {
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        data.forEach(item => {
+          const option = document.createElement('option');
+          option.value = item.id;
+          option.text = optionTextCallback(item);
+
+          if (fieldId == item.id) {
+            option.selected = true;
+          }
+
+          document.getElementById(selectId).add(option);
+        });
+      })
+      .catch(error => {
+        console.error(`Error fetching ${selectId}:`, error);
+      });
+  }
+
+  // Usage for departments
+  fetchDataAndPopulateSelect('/masters/api/departments/', 'id_department', dept => `${dept.code} - ${dept.name}`, {{ student.department.id|default:0 }});
+
+  // Usage for enrollment_years
+  fetchDataAndPopulateSelect('/masters/api/enrollment_years/', 'id_enrollment_year', ey => `${ey.code} - ${ey.year}`, {{ student.enrollment_year.id|default:0 }});
+
+  fetchDataAndPopulateSelect('/masters/api/sections/', 'id_section', sec => `${sec.name}`, {{ student.section.id|default:0 }});
+
+</script>
+
+
+{% endblock %}

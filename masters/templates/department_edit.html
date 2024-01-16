@@ -1,0 +1,68 @@
+<!-- masters/templates/department_edit.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if department.id %} Edit Department
+   {% else %} New Department
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+<!-- Header Section -->
+   <div class="header d-flex justify-content-between align-items-center">
+    <a href="{% url 'departments' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+
+    <h3 class="m-0 font-weight-bold text-primary">
+       {% if department.id %} Department: {{ department.name }}
+       {% else %} New Department
+       {% endif %}
+    </h3>
+
+    <div class="d-flex">
+       <!-- New Department Button -->
+       <a href="{% url 'department_edit' department_id=0 %}" class="ml-auto">
+          <button type="button" class="btn btn-success">New Department</button>
+       </a>
+    </div>
+   </div>
+   </div>
+
+<div class="card-body">
+<!-- Container for Department Photo and Details -->
+<form method="post" action="{% if department.id %}{% url 'department_edit' department_id=department.id %}{% endif %}" data-department-id="{{ department.id }}" enctype="multipart/form-data" style="flex-grow: 1;">
+
+  {% csrf_token %}
+  
+  <div class="row mb-2">
+    {% for field in form %}
+      <div class="col-md-6">
+        <label for="{{ field.id_for_label }}" style="font-weight: bold;">Department {{ field.label }}</label>
+        {{ field }}
+        <!-- You can add additional error handling here if needed -->
+        {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <hr>
+  <!-- Save/Update, Delete, and Cancel Buttons -->
+  <div class="button-row mt-3">
+    <button id="updateButton" type="submit" class="btn btn-success">{% if department.id %}Update{% else %}Save{% endif %}</button>
+    <a href="{% url 'departments' %}" class="btn btn-secondary ml-2">Cancel</a>
+    {% if department.id %}
+      <button type="submit" name="delete" class="btn btn-danger ml-2 float-right" onclick="return confirm('Are you sure to delete?')">Delete</button>
+    {% endif %}
+  </div>
+</form>
+</div>
+
+{% endblock %}

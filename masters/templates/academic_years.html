@@ -1,0 +1,71 @@
+<!-- masters/templates/academic_years.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Academic Year{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Academic Years</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'academic_years' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by academic year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+        <a href="{% url 'academic_year_edit' academic_year_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if academic_years.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if academic_years.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ academic_years.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ academic_years.number }} of {{ academic_years.paginator.num_pages }}
+                      </span>
+          
+                      {% if academic_years.has_next %}
+                          <a href="?page={{ academic_years.next_page_number }}">next</a>
+                          <a href="?page={{ academic_years.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Academic Year</th>
+        <!-- Add more columns as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for academic_year in academic_years %}
+        <tr>
+          <th scope="row">{{ add_to_loop|add:forloop.counter }}</th>
+          <td><a href="{% url 'academic_year_edit' academic_year.id %}">{{ academic_year.academic_year }}</a></td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

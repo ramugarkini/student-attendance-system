@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{% static 'icon/pdf.png' %}">
+
+
+    <title>{{ date|date:"d-m-Y" }} {{ department }} {{ section }} {{ enrollment_year }} {{ subject_code }} Attendance</title>
+
+    <!-- Custom fonts for this template-->
+
+
+    <!-- Custom styles for this template-->
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+</head>
+<body>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                  <label style="font-weight: bold;">Date</label><br><br>
+                  <label>{{ date|date:"d-m-Y" }}</label>
+                </td><br>
+                <td>
+                  <label style="font-weight: bold;">Department</label><br><br>
+                  <label>{{ department }}</label>
+                </td>
+                <td>
+                  <label style="font-weight: bold;">Section</label><br><br>
+                  <label>{{ section }}</label>
+                </td>
+                <td>
+                  <label style="font-weight: bold;">Academic Year</label><br><br>
+                  <label>{{ enrollment_year }}</label>
+                </td>
+                <td>
+                  <label style="font-weight: bold;">Weekday</label><br><br>
+                  <label>{{ weekday }}</label>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                  <label style="font-weight: bold;">Subject Name</label><br><br>
+                  <label>{{ subject_name }}</label>
+                </td>
+                <td>
+                  <label style="font-weight: bold;">Subject Code</label><br><br>
+                  <label>{{ subject_code }}</label>
+                </td>
+
+                <td>
+                  <label style="font-weight: bold;">Period No</label><br><br>
+                  <label>{{ period_no }}</label>
+                </td>
+
+                <td>
+                  <label style="font-weight: bold;">Start Time</label><br><br>
+                  <label>{{ start_time|date:"H:i:s" }}</label>
+                </td>
+                <td>
+                  <label style="font-weight: bold;">End Time</label><br><br>
+                  <label>{{ end_time|date:"H:i:s" }}</label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sr. No.</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Roll Number</th>
+                <th>Student Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in student_details %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ detail.date|date:"d-m-Y" }}</td>
+                    <td>{{ detail.time|date:"H:i:s" }}</td>
+                    <td>{{ detail.roll_number }}</td>
+                    <td>{{ detail.student_name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

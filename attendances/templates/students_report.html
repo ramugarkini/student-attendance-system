@@ -1,0 +1,91 @@
+<!-- masters/templates/students_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Students List{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <a href="{% url 'attendance_details_report' attendance_id %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+        <h3 class="m-0 font-weight-bold text-primary">Students List</h3>
+        <a target="_blank" href="{% url 'students_report' attendance_id=attendance_id attendance_timetable_detail_id=attendance_timetable_detail_id pdf=1 %}" class="btn btn-success"><i class="fa fa-file-pdf"></i> Generate PDF</a>
+  </div>
+</div>
+
+<div class="card-body">
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+          <label style="font-weight: bold;">Date</label>
+          <p>{{ date|date:"d-m-Y" }}</p>
+        </div>
+        <div class="col-md-3">
+          <label style="font-weight: bold;">Department</label>
+          <p>{{ department }}</p>
+        </div>
+        <div class="col-md-2">
+          <label style="font-weight: bold;">Section</label>
+          <p>{{ section }}</p>
+        </div>
+        <div class="col-md-2">
+          <label style="font-weight: bold;">Academic Year</label>
+          <p>{{ enrollment_year }}</p>
+        </div>
+        <div class="col-md-2">
+          <label style="font-weight: bold;">Weekday</label>
+          <p>{{ weekday }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+          <label style="font-weight: bold;">Subject Name</label>
+          <p>{{ subject_name }}</p>
+        </div>
+        <div class="col-md-3">
+          <label style="font-weight: bold;">Subject Code</label>
+          <p>{{ subject_code }}</p>
+        </div>
+
+        <div class="col-md-2">
+          <label style="font-weight: bold;">Period No</label>
+          <p>{{ period_no }}</p>
+        </div>
+
+        <div class="col-md-2">
+          <label style="font-weight: bold;">Start Time</label>
+          <p>{{ start_time|date:"H:i:s" }}</p>
+        </div>
+        <div class="col-md-2">
+          <label style="font-weight: bold;">End Time</label>
+          <p>{{ end_time|date:"H:i:s" }}</p>
+        </div>
+    </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Time</th>
+        <th scope="col">Roll Number</th>
+        <th scope="col">Student Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for detail in student_details %}
+          <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ detail.date|date:"d-m-Y" }}</td>
+                <td>{{ detail.time|date:"H:i:s" }}</td>
+                <td>{{ detail.roll_number }}</td>
+                <td>{{ detail.student_name }}</td>
+          </tr>
+      {% endfor %}
+  </tbody>
+  </table>
+</div>
+
+{% endblock %}

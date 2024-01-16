@@ -1,0 +1,79 @@
+<!-- masters/templates/timetables.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Timetables{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Timetables</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'timetables' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by department or year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+
+        <a href="{% url 'timetable_edit' timetable_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if timetables.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if timetables.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ timetables.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ timetables.number }} of {{ timetables.paginator.num_pages }}
+                      </span>
+          
+                      {% if timetables.has_next %}
+                          <a href="?page={{ timetables.next_page_number }}">next</a>
+                          <a href="?page={{ timetables.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Timetable Department</th>
+        <th scope="col">Timetable Section</th>
+        <th scope="col">Timetable Year</th>
+        <th scope="col">Timetable Weekday</th>
+        <!-- Add more columns as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for timetable in timetables %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ timetable.department.name }}</td>
+          <td>{{ timetable.section.name }}</td>
+          <td><a href="{% url 'timetable_edit' timetable.id %}">{{ timetable.enrollment_year.academic_year.academic_year }}</a></td>
+          <td>{{ timetable.get_weekday_display }}</td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

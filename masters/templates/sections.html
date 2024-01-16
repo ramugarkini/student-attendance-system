@@ -1,0 +1,72 @@
+<!-- masters/templates/sections.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Sections{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Sections</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'sections' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by name" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+
+        <a href="{% url 'section_edit' section_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if sections.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if sections.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ sections.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ sections.number }} of {{ sections.paginator.num_pages }}
+                      </span>
+          
+                      {% if sections.has_next %}
+                          <a href="?page={{ sections.next_page_number }}">next</a>
+                          <a href="?page={{ sections.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Section Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for section in sections %}
+        <tr>
+          <th scope="row">{{ add_to_loop|add:forloop.counter }}</th>
+          <td><a href="{% url 'section_edit' section.id %}">{{ section.name }}</a></td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+{% endblock %}

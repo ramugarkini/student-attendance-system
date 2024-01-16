@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if timetable.id %} Edit Timetable
+   {% else %} New Timetable
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+  #details_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  #details_table th, #details_table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  #details_table th {
+    background-color: #f2f2f2;
+  }
+
+  .add-row, .delete-row {
+    cursor: pointer;
+  }
+
+  .add-row {
+    color: #fff;
+    background-color: #17a673;
+    background-border: #169b6b;
+  }
+
+  .delete-row {
+    color: #fff;
+    background-color: #e74a3b;
+    background-border: #e74a3b;
+  }
+</style>
+
+<div class="card shadow">
+  <div class="card-header">
+<!-- Header Section -->
+<div class="header d-flex justify-content-between align-items-center">
+        <a href="{% url 'timetables' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+
+        <h3 class="m-0 font-weight-bold text-primary">
+            {% if timetable.id %} Timetable : {{ timetable.department.name }} - {{ timetable.enrollment_year.academic_year.academic_year }}
+            {% else %} New Timetable
+            {% endif %}
+        </h3>
+
+        <div class="d-flex">
+        <!-- New Timetable Button -->
+        <a href="{% url 'timetable_edit' timetable_id=0 %}">
+            <button type="button" class="btn btn-success">New Timetable</button>
+        </a>
+    </div>
+</div>
+</div>
+
+<div class="card-body">
+<form method="post" action="{% if timetable.id %}{% url 'timetable_edit' timetable_id=timetable.id %}{% endif %}" data-timetable-id="{{ timetable.id }}" enctype="multipart/form-data" style="flex-grow: 1;">
+  {% csrf_token %}
+  
+  <!-- Render form fields manually -->
+  <div class="row mb-3">
+    {% for field in form %}
+      <div class="col-md-3">
+        <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
+        {{ field }}
+        <!-- You can add additional error handling here if needed -->
+        {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Timetable Details Table -->
+  {{ timetable_detail_formset.management_form }}
+  <table id="details_table" class="table">
+    <thead>
+      <tr>
+        <th>Period No</th>
+        <th>Subject Name</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in timetable_detail_formset %}
+        <tr>
+          {% for field in form %}
+            {% if field.name == "id" %}
+              <td style="display: none;">{{ field }}</td>
+            {% else %}
+              <td>{{ field }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+
+      {% if timetable_detail_formset.non_form_errors %}
+        <ul class="errorlist">
+          {% for error in timetable_detail_formset.non_form_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+    </tbody>
+  </table>
+
+<hr>
+  <!-- Save/Update, Delete, and Cancel Buttons -->
+  <div class="button-row mt-3">
+    <button id="updateButton" type="submit" class="btn btn-success">{% if timetable.id %}Update{% else %}Save{% endif %}</button>
+    <a href="{% url 'timetables' %}" class="btn btn-secondary ml-2">Cancel</a>
+    {% if timetable.id %}
+      <button type="submit" name="delete" class="btn btn-danger ml-2 float-right" onclick="return confirm('Are you sure to delete?')">Delete</button>
+    {% endif %}
+  </div>
+</form>
+</div>
+
+
+{% load static %}
+<script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
+<script>
+  function subjects(onChangeDeptEy=1, subjectDetailSelector=$('.subject_detail')) {
+    try {
+      var departmentId = $('#id_department').val();
+      var enrollmentYearId = $('#id_enrollment_year').val();
+      // Assuming subjectDetailSelector is meant to be a jQuery object
+      var subjectDetailId = 0;
+
+      // Check if subjectDetailSelector is a valid jQuery object
+      if (subjectDetailSelector.length > 0) {
+          // Check if val() method is available
+          if (typeof subjectDetailSelector.val === 'function') {
+              // Use val() method to get the value
+              subjectDetailId = subjectDetailSelector.val() || 0;
+          }
+      }
+
+      if (onChangeDeptEy == 1) {
+        subjectDetailId = 0;
+      }
+
+      if (!departmentId || !enrollmentYearId) {
+          // If either department or enrollment year is not selected, do something (e.g., display a message)
+          // console.log("Please select both department and enrollment year");
+          return;
+      }
+
+
+      $.ajax({
+          url: '/masters/api/subjects/',
+          data: { department: departmentId, enrollment_year: enrollmentYearId },
+          dataType: 'json',
+          success: function(data) {
+              var subjectDetailsDropdown = subjectDetailSelector;
+              subjectDetailsDropdown.empty();
+
+
+              $.each(data, function(index, subject) {
+                  var option = '<option value="' + subject.id + '"';
+                      
+                  // Check if the current subject id matches the selected value
+                  if (subject.id == subjectDetailId) {
+                      option += ' selected';
+                  }
+
+                  option += '>' + subject.name + '</option>';
+                  
+                  subjectDetailsDropdown.append(option);
+              });
+
+              if (subjectDetailId == 0) {
+                  subjectDetailsDropdown.prepend('<option value="" selected="">---------</option>');
+              } else {
+                  subjectDetailsDropdown.prepend('<option value="">---------</option>');
+              }
+          },
+          error: function(error) {
+              console.log('Error fetching subjects:', error);
+          }
+      });
+    } catch (error) {
+        console.log('An error occurred:', error);
+    }
+  }
+
+  $(document).ready(function() {
+    $('#details_table tbody tr:last').find('td:last').html('<button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>');
+
+    $(document).on('click', '.add-row', function() {
+      // Check if any input in the current row has a missing or invalid value
+      var inputsValid = $(this).closest('tr').find('input[type="text"], input[type="number"], input[type="time"], select').filter(function() {
+           return ($(this).is('select') && $(this).find('option:selected').index() === 0) || !$(this).val(); // Check if the input value is empty
+      }).length === 0;
+
+      if (inputsValid) {
+        $(this).removeClass('btn btn-success add-row').addClass('btn btn-danger delete-row').html('<i class="fa fa-minus"></i>');
+
+        var newRow = $(this).closest('tr').clone();
+        newRow.find('input').val('');
+        newRow.find('.delete-row').removeClass('btn btn-danger delete-row').addClass('btn btn-success add-row').html('<i class="fa fa-plus"></i>');
+
+        $('#details_table').append(newRow);
+
+        $('#details_table tbody tr:last').find('td:not(:last)').each(function(index, td) {
+          var inputElement = $(td).find('input, select');
+          var currentName = inputElement.attr('name');
+          var currentNumber = parseInt(currentName.match(/\d+/)[0]);
+          var newNumber = currentNumber + 1;
+          inputElement.attr('name', currentName.replace(currentNumber, newNumber));
+          inputElement.attr('id', inputElement.attr('id').replace(currentNumber, newNumber));
+        });
+
+        $('#id_timetable_details-TOTAL_FORMS').val($('#details_table tbody tr').length);
+      }
+    });
+
+    $(document).on('click', '.delete-row', function() {
+      $(this).closest('tr').remove();
+      $('#id_timetable_details-TOTAL_FORMS').val($('#details_table tbody tr').length);
+      // $('#details_table tbody tr:last').find('.add-row').click();
+    });
+
+
+    // Event listener for department and academic year dropdown changes
+    $('#id_department, #id_enrollment_year').on('change', function() {
+      var onChangeDeptEy = 1;
+      subjects(onChangeDeptEy, $('.subject_detail'));
+    });
+
+    $('#details_table tbody tr').find('td').each(function(index, td) {
+      var inputElement = $(td).find('select');
+      var subjectDetailSelector = inputElement.attr('id');
+      var onChangeDeptEy = 0;
+      subjects(onChangeDeptEy, $('#' + subjectDetailSelector));
+    });
+  });
+
+</script>
+
+
+{% endblock %}
+

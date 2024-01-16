@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if holiday.id %} Edit Holiday
+   {% else %} New Holiday
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+  #details_table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  #details_table th, #details_table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  #details_table th {
+    background-color: #f2f2f2;
+  }
+
+  .add-row, .delete-row {
+    cursor: pointer;
+  }
+</style>
+
+<div class="card shadow">
+  <div class="card-header">
+<!-- Header Section -->
+<div class="header d-flex justify-content-between align-items-center">
+        <a href="{% url 'holidays' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+
+        <h3 class="m-0 font-weight-bold text-primary">
+            {% if holiday.id %} Holiday Year : {{ holiday.year }}
+            {% else %} New Holiday
+            {% endif %}
+        </h3>
+
+    <div class="d-flex">
+        <!-- New Holiday Button -->
+        <a href="{% url 'holiday_edit' holiday_id=0 %}" class="ml-auto">
+            <button type="button" class="btn btn-success">New Holiday</button>
+        </a>
+    </div>
+</div>
+</div>
+
+<div class="card-body">
+<form method="post" action="{% if holiday.id %}{% url 'holiday_edit' holiday_id=holiday.id %}{% endif %}" data-holiday-id="{{ holiday.id }}" enctype="multipart/form-data" style="flex-grow: 1;">
+  {% csrf_token %}
+  
+  <!-- Render form fields manually -->
+  <div class="row mb-3">
+    {% for field in form %}
+      <div class="col-md-4">
+        <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
+        {{ field }}
+        <!-- You can add additional error handling here if needed -->
+        {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Holiday Details Table -->
+  {{ holiday_detail_formset.management_form }}
+  <table id="details_table" class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Holiday Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in holiday_detail_formset %}
+        <tr>
+          {% for field in form %}
+            {% if field.name == "id" %}
+              <td style="display: none;">{{ field }}</td>
+            {% else %}
+              <td>{{ field }}</td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+
+      {% if holiday_detail_formset.non_form_errors %}
+        <ul class="errorlist">
+          {% for error in holiday_detail_formset.non_form_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+    </tbody>
+  </table>
+
+<hr>
+  <!-- Save/Update, Delete, and Cancel Buttons -->
+  <div class="button-row mt-3">
+    <button id="updateButton" type="submit" class="btn btn-success">{% if holiday.id %}Update{% else %}Save{% endif %}</button>
+    <a href="{% url 'holidays' %}" class="btn btn-secondary ml-2">Cancel</a>
+    {% if holiday.id %}
+      <button type="submit" name="delete" class="btn btn-danger ml-2 float-right" onclick="return confirm('Are you sure to delete?')">Delete</button>
+    {% endif %}
+  </div>
+</form>
+</div>
+
+
+{% load static %}
+<script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
+<script>
+  $(document).ready(function() {
+    $('#details_table tbody tr:last').find('td:last').html('<button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>');
+
+    $(document).on('click', '.add-row', function() {
+      // Check if any input in the current row has a missing or invalid value
+      var inputsValid = $(this).closest('tr').find('input[type="text"], input[type="date"]').filter(function() {
+          return !$(this).val(); // Check if the input value is empty
+      }).length === 0;
+
+      if (inputsValid) {
+        $(this).removeClass('btn btn-success add-row').addClass('btn btn-danger delete-row').html('<i class="fa fa-minus"></i>');
+
+        var newRow = $(this).closest('tr').clone();
+        newRow.find('input').val('');
+        newRow.find('.delete-row').removeClass('btn btn-danger delete-row').addClass('btn btn-success add-row').html('<i class="fa fa-plus"></i>');
+
+        $('#details_table').append(newRow);
+
+        $('#details_table tbody tr:last').find('td:not(:last)').each(function(index, td) {
+          var inputElement = $(td).find('input');
+          var currentName = inputElement.attr('name');
+          var currentNumber = parseInt(currentName.match(/\d+/)[0]);
+          var newNumber = currentNumber + 1;
+          inputElement.attr('name', currentName.replace(currentNumber, newNumber));
+          inputElement.attr('id', inputElement.attr('id').replace(currentNumber, newNumber));
+        });
+
+        $('#id_holiday_details-TOTAL_FORMS').val($('#details_table tbody tr').length);
+      }
+    });
+
+    $(document).on('click', '.delete-row', function() {
+      $(this).closest('tr').remove();
+      $('#id_holiday_details-TOTAL_FORMS').val($('#details_table tbody tr').length);
+      // $('#details_table tbody tr:last').find('.add-row').click();
+    });
+
+
+  });
+
+</script>
+
+
+{% endblock %}
+

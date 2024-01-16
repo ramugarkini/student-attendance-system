@@ -1,0 +1,75 @@
+<!-- masters/templates/holidays.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Holidays{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Holidays</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'holidays' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+
+        <a href="{% url 'holiday_edit' holiday_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if holidays.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if holidays.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ holidays.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ holidays.number }} of {{ holidays.paginator.num_pages }}
+                      </span>
+          
+                      {% if holidays.has_next %}
+                          <a href="?page={{ holidays.next_page_number }}">next</a>
+                          <a href="?page={{ holidays.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Holiday Year</th>
+        <th scope="col">No of Holidays</th>
+        <!-- Add more columns as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for holiday, count_of_details in holidays_with_count %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td><a href="{% url 'holiday_edit' holiday.id %}">{{ holiday.year }}</a></td>
+          <td>{{ count_of_details }}</td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+<!-- masters/templates/enrollment_years.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Enrollment Year{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Enrollment Years</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'enrollment_years' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by code or year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+        <a href="{% url 'enrollment_year_edit' enrollment_year_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if enrollment_years.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if enrollment_years.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ enrollment_years.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ enrollment_years.number }} of {{ enrollment_years.paginator.num_pages }}
+                      </span>
+          
+                      {% if enrollment_years.has_next %}
+                          <a href="?page={{ enrollment_years.next_page_number }}">next</a>
+                          <a href="?page={{ enrollment_years.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Enrollment Year Code</th>
+        <th scope="col">Enrollment Year</th>
+        <th scope="col">Current Academic Year</th>
+        <!-- Add more columns as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for enrollment_year in enrollment_years %}
+        <tr>
+          <th scope="row">{{ add_to_loop|add:forloop.counter }}</th>
+          <td>{{ enrollment_year.code }}</td>
+          <td><a href="{% url 'enrollment_year_edit' enrollment_year.id %}">{{ enrollment_year.year }}</a></td>
+          <td>{{ enrollment_year.academic_year.academic_year }}</td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

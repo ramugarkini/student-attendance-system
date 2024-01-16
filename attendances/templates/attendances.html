@@ -1,0 +1,85 @@
+<!-- masters/templates/attendances.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Attendance{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Attendance</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'attendances' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by department or year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+        <a href="{% url 'attendance_edit' attendance_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+        
+
+        <div class="d-flex">
+            {# {% if attendances.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if attendances.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ attendances.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ attendances.number }} of {{ attendances.paginator.num_pages }}
+                      </span>
+          
+                      {% if attendances.has_next %}
+                          <a href="?page={{ attendances.next_page_number }}">next</a>
+                          <a href="?page={{ attendances.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Attendance Department</th>
+        <th scope="col">Attendance Section</th>
+        <th scope="col">Attendance Year</th>
+        <th scope="col">Attendance Date</th>
+        <th scope="col">Attendance Weekday</th>
+        <th scope="col">Edit</th>
+        <th scope="col">View</th>
+        <!-- Add more columns as needed -->
+      </tr>
+    </thead>
+    <tbody>
+      {% for attendance in attendances %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ attendance.department.name }}</td>
+          <td>{{ attendance.section.name }}</td>
+          <td>{{ attendance.enrollment_year.academic_year.academic_year }}</a></td>
+          <td>{{ attendance.date|date:"d-m-Y" }}</td>
+          <td>{{ attendance.get_weekday_display }}</td>
+          <td><a href="{% url 'attendance_edit' attendance.id %}"><i class="fa fa-edit"></i></a></td>
+          <td><a href="{% url 'attendance_details' attendance.id %}"><i class="fa fa-eye"></i></a></td>
+          <!-- Add more columns as needed -->
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

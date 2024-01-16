@@ -1,0 +1,69 @@
+<!-- academic_years/templates/academic_year_edit.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+   {% if academic_year.id %} Edit Academic Year
+   {% else %} New Academic Year
+   {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+<!-- Header Section -->
+<div class="header d-flex justify-content-between align-items-center">
+  <a href="{% url 'academic_years' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+
+  <h3 class="m-0 font-weight-bold text-primary">
+     {% if academic_year.id %} Academic Year: {{ academic_year.academic_year }}
+     {% else %} New Academic Year
+     {% endif %}
+  </h3>
+
+  <div class="d-flex">
+    <!-- New Academic Year Button -->
+    <a href="{% url 'academic_year_edit' academic_year_id=0 %}" class="ml-auto">
+      <button type="button" class="btn btn-success">New Academic Year</button>
+    </a>
+  </div>
+</div>
+</div>
+
+<div class="card-body">
+<!-- Container for Academic Year Photo and Details -->
+<form method="post" action="{% if academic_year.id %}{% url 'academic_year_edit' academic_year_id=academic_year.id %}{% endif %}" data-academic_year-id="{{ academic_year.id }}" enctype="multipart/form-data" style="flex-grow: 1;">
+
+  {% csrf_token %}
+  
+  <div class="row mb-3">
+    {% for field in form %}
+      <div class="col-md-4">
+        <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
+
+        {{ field }}
+        <!-- You can add additional error handling here if needed -->
+        {% if field.errors %}
+          <ul class="errorlist">
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <hr>
+  <!-- Save/Update, Delete, and Cancel Buttons -->
+  <div class="button-row mt-3">
+    <button id="updateButton" type="submit" class="btn btn-success">{% if academic_year.id %}Update{% else %}Save{% endif %}</button>
+    <a href="{% url 'academic_years' %}" class="btn btn-secondary ml-2">Cancel</a>
+    {% if academic_year.id %}
+      <button type="submit" name="delete" class="btn btn-danger ml-2 float-right" onclick="return confirm('Are you sure to delete?')">Delete</button>
+    {% endif %}
+  </div>
+</form>
+</div>
+
+{% endblock %}

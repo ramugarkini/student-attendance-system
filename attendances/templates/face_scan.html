@@ -1,0 +1,243 @@
+<!-- capture_face.html -->
+{% extends is_local|yesno:'base.html,base_specific_access.html' %}
+
+{% block title %}Face Scan{% endblock %}
+
+{% block content %}
+
+  <style>
+    /* Optional: Add your own custom styles here */
+    #video, #canvas {
+      max-width: 100%; /* Ensure videos and canvas are responsive */
+      height: auto;
+    }
+  </style>
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">Face Scan</h3>
+    </div>
+  </div>
+
+  <!-- Video and Canvas Section -->
+  <div class="card-body">
+    <div class="container">
+      <div class="row">
+        <!-- Left Side: Face Scan -->
+        <div class="col-md-8">
+          <video id="video" width="640" height="480" autoplay></video>
+          <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+          <div id="recognizedFaceName"></div>
+        </div>
+
+        <!-- Right Side: Student Details -->
+        <div class="col-md-4">
+          <div id="studentInfo" style="display:none;">
+            <h2>Student Information</h2>
+            <div id="studentDetails">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  {% load static %}
+  <audio id="notificationSound" src="{% static 'audio/beep.mp3' %}" preload="auto"></audio>
+
+  <!-- JavaScript Section for Capturing Image -->
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const recognizedFaceNameElement = document.getElementById('recognizedFaceName');
+    const studentInfoDiv = document.getElementById('studentInfo');
+    const studentDetailsDiv = document.getElementById('studentDetails');
+
+    // Function to get CSRF token from cookies
+    function getCSRFToken() {
+      const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='))
+        .split('=')[1];
+
+      return cookieValue;
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        video.srcObject = stream;
+      })
+      .catch((error) => {
+        console.error('Error accessing camera:', error);
+      });
+
+    // Function to update student details on the right side
+    function updateStudentDetails(studentInfo) {
+      // Display the student information
+      studentDetailsDiv.innerHTML = `
+        <style>
+          .id-card {
+              display: flex;
+              flex-direction: column;
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              overflow: hidden;
+              max-width: 300px;
+          }
+
+          .id-card-header {
+              text-align: center;
+              padding: 10px;
+              background-color: #f0f0f0;
+          }
+
+          .id-card-header img {
+              width: 100%;
+              height: auto;
+              border-radius: 50%;
+          }
+
+          .id-card-body {
+              padding: 15px;
+          }
+
+          .card-title {
+              font-size: 1.5rem;
+              margin-bottom: 10px;
+          }
+
+          .card-text {
+              margin-bottom: 5px;
+          }
+          </style>
+          <div class="id-card">
+              <div class="id-card-header">
+                  <img src="${studentInfo.image_path}" alt="Student Image" class="img-fluid rounded" style="max-height: 100%;">
+              </div>
+              <div class="id-card-body">
+                  <h5 class="card-title">${studentInfo.name}</h5>
+                  <p class="card-text"><strong>Roll Number:</strong> ${studentInfo.roll_number}</p>
+                  <p class="card-text"><strong>Department:</strong> ${studentInfo.department}</p>
+                  <p class="card-text"><strong>Section:</strong> ${studentInfo.section}</p>
+                  <p class="card-text"><strong>Enrollment Year:</strong> ${studentInfo.enrollment_year}</p>
+                  <p class="card-text"><strong>Academic Year:</strong> ${studentInfo.academic_year}</p>
+              </div>
+          </div>
+          <ul class="scan_messages" id="attendanceMessages">
+              <li id="attendance_status"></li>
+          </ul>
+      `;
+
+
+      var attendanceStatus = studentInfo.attendance_status;
+
+      if (attendanceStatus && attendanceStatus.length > 0) {
+          // Show the ul and li elements
+          document.getElementById('attendanceMessages').style.display = 'block';
+          document.getElementById('attendance_status').innerHTML = attendanceStatus;
+      } else {
+          // Hide the ul and li elements
+          document.getElementById('attendanceMessages').style.display = 'none';
+      }
+      
+      // Play the notification sound
+      const notificationSound = document.getElementById('notificationSound');
+      notificationSound.play();
+
+      // Show the student information section
+      studentInfoDiv.style.display = 'block';
+
+      // Hide the student information section after 5 seconds
+      setTimeout(() => {
+        studentInfoDiv.style.display = 'none';
+
+        // After 5 seconds, initiate face scanning again
+        captureImage();
+
+        var flashMessages = document.getElementsByClassName('scan_messages');
+        if (flashMessages.length > 0) {
+            flashMessages[0].style.display = 'none';
+        }
+      }, 10000);
+    }
+
+    function captureImage() {
+        // Draw the current video frame onto the canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert the canvas content to a data URL (base64-encoded image)
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        // Create a FormData object and append the image_data
+        const formData = new FormData();
+        formData.append('image_data', imageData);
+
+        // Submit the captured image for face recognition
+        fetch('{% url 'face_recognize' %}', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-CSRFToken': getCSRFToken(),
+          },
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Response received:', data);
+
+          // If face is recognized, display the recognized face name and original student information
+          if (data && data.recognized_face_name && data.student_info) {
+            // recognizedFaceNameElement.textContent = `Recognized Face: ${data.recognized_face_name}`;
+            updateStudentDetails(data.student_info);
+          } else {
+            // If face is not recognized, continue capturing images
+            setTimeout(() => {
+              captureImage();
+            }, 500);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+    // Start capturing images as soon as the page loads
+    captureImage();
+  </script>
+
+  <style>
+      ul.scan_messages {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          text-align: center;
+      }
+
+      ul.scan_messages li {
+          display: inline-block;
+          margin: 0 5px;
+          padding: 10px;
+          background-color: #1cc88a;
+          color: #fff;
+          border-radius: 5px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .scan_messages {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+  </style>
+
+  <ul class="scan_messages">
+      {% for message in messages %}
+          <li>{{ message }}</li>
+      {% endfor %}
+  </ul>
+
+{% endblock %}

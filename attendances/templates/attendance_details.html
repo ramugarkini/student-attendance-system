@@ -1,0 +1,54 @@
+<!-- masters/templates/attendance_details_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Attendance Details{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <a href="{% url 'attendances' %}" class="btn btn-primary"><i class="fa fa-arrow-left"></i></a>
+        <h3 class="m-0 font-weight-bold text-primary">Attendance Details</h3>
+        <a href="{% url 'attendance_detail_edit' attendance_id=attendance_id attendance_timetable_detail_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Date</th>
+        <th scope="col">Subject Code</th>
+        <th scope="col">Subject Name</th>
+        <th scope="col">Period No</th>
+        <th scope="col">Start Time</th>
+        <th scope="col">End Time</th>
+        <th scope="col">Actions</th> <!-- Add more columns as needed -->
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in data_list %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ row.date }}</td>
+              <td>{{ row.subject_detail__code }}</td>
+              <td>{{ row.subject_detail__name }}</td>
+              <td>{{ row.period_no }}</td>
+              <td>{{ row.start_time|date:"H:i:s" }}</td>
+              <td>{{ row.end_time|date:"H:i:s" }}</td>
+              <td>
+                <a href="{% url 'attendance_detail_edit' attendance_id=attendance_id attendance_timetable_detail_id=row.attendance_timetable_detail_id  %}"><i class="fa fa-eye"></i></a>
+                  <!-- Add more action links as needed -->
+              </td>
+          </tr>
+      {% endfor %}
+  </tbody>
+  </table>
+</div>
+
+{% endblock %}

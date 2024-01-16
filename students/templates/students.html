@@ -1,0 +1,84 @@
+<!-- students/templates/students.html -->
+{% extends 'base.html' %}
+
+{% block title %}List of Students{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">List of Students</h3>
+        <div class="col-lg-5">
+          <form class="search-form" method="get" action="{% url 'students' %}">
+              <div class="input-group">
+                  <input type="text" name="search" class="form-control" placeholder="Search by name or roll no or dept or year" value="{{ search_query }}">
+                  <div class="input-group-append">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-search fa-sm"></i></button>
+                  </div>
+              </div>
+          </form>
+        </div>
+
+        <a href="{% url 'student_edit' student_id=0 %}" >
+            <button type="button" class="btn btn-success">New</button>
+        </a>
+
+        <div class="d-flex">
+            {# {% if students.has_other_pages %} #}
+              <div class="pagination">
+                  <span class="step-links">
+                      {% if students.has_previous %}
+                          <a href="?page=1">&laquo; first</a>
+                          <a href="?page={{ students.previous_page_number }}">previous</a>
+                      {% endif %}
+          
+                      <span class="current">
+                          Page {{ students.number }} of {{ students.paginator.num_pages }}
+                      </span>
+          
+                      {% if students.has_next %}
+                          <a href="?page={{ students.next_page_number }}">next</a>
+                          <a href="?page={{ students.paginator.num_pages }}">last &raquo;</a>
+                      {% endif %}
+                  </span>
+              </div>
+            {# {% endif %} #}
+        </div>
+  </div>
+</div>
+
+<div class="card-body">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Student Name</th>
+        <th scope="col">Roll Number</th>
+        <th scope="col">Department</th>
+        <th scope="col">Section</th>
+        <th scope="col">Enrollment Year</th>
+        <th scope="col">Image</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+        <tr>
+          <th scope="row">{{ add_to_loop|add:forloop.counter }}</th>
+          <td><a href="{% url 'student_edit' student.id %}">{{ student.name }}</a></td>
+          <td>{{ student.roll_number }}</td>
+          <td>{{ student.department.name }}</td>
+          <td>{{ student.section.name }}</td>
+          <td>{{ student.enrollment_year.year }}</td>
+          <td>
+            {% if student.image %}
+              <img src="{{ student.image.url }}" alt="{{ student.name }}" style="max-width: 100px;">
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
