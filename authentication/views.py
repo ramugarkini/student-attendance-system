@@ -65,7 +65,7 @@ def configuration(request):
 
     cs = ConfigurationSettings.objects.latest('id')
 
-    return {'items_per_page': cs.rows_per_page, 'topbar_link': cs.topbar_link, 'topbar_link_text': cs.topbar_link_text, 'sidebar_text': cs.sidebar_text, 'sidebar_icon': cs.sidebar_icon, 'favicon': cs.favicon, 'user_name': cs.user_name, 'user_icon': cs.user_icon, 'is_local': is_local}
+    return {'items_per_page': cs.rows_per_page, 'topbar_link': cs.topbar_link, 'topbar_link_text': cs.topbar_link_text, 'sidebar_text': cs.sidebar_text, 'sidebar_icon': cs.sidebar_icon, 'favicon': cs.favicon, 'client_user_name': cs.client_user_name, 'server_user_name': cs.server_user_name, 'user_icon': cs.user_icon, 'is_local': is_local}
 
 @restrict_access_to_local
 def allow_host(request):

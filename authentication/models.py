@@ -10,7 +10,8 @@ class ConfigurationSettings(models.Model):
     sidebar_icon = models.ImageField(upload_to='images/icons/', blank=True, null=True)
     favicon = models.ImageField(upload_to='images/icons/', blank=True, null=True)
     user_icon = models.ImageField(upload_to='images/icons/', blank=True, null=True)
-    user_name = models.CharField(max_length=255, blank=True, null=True)
+    server_user_name = models.CharField(max_length=255, blank=True, null=True)
+    client_user_name = models.CharField(max_length=255, blank=True, null=True)
     
     ALLOW_HOST_CHOICES = [
         (False, 'Off'),

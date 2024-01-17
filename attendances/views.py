@@ -25,6 +25,7 @@ import os
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from functools import wraps
 
@@ -243,6 +244,8 @@ def attendance_detail_edit(request, attendance_id, attendance_timetable_detail_i
 #
 @allow_host
 def face_scan(request):
+    current_site = get_current_site(request)
+    settings.CSRF_TRUSTED_ORIGINS = [f'https://{current_site.domain}']
     return render(request, 'face_scan.html')
 
 def face_recognize(request):

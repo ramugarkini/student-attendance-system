@@ -169,8 +169,8 @@ DEFAULT_FROM_EMAIL = 'noreply.322136410122@gmail.com'
 # ]
 # CORS_ALLOW_ALL_ORIGINS = True  # Use this line if you want to allow all origins with a wildcard
 
-# CSRF_TRUSTED_ORIGINS = ['https://192.168.1.7']
-CSRF_TRUSTED_ORIGINS = ['https://*']
+CSRF_TRUSTED_ORIGINS = ['https://192.168.1.7']
+# CSRF_TRUSTED_ORIGINS = ['https://*']
 # CSRF_USE_SESSIONS = False
 
 # AUTH_USER_MODEL = 'authentication.CustomUser'

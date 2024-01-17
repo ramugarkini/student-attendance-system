@@ -25,9 +25,10 @@
               <br><img src="/media/{{ field.value }}" style="max-width: 100px;"><br>
               <input type="file" name="user_icon" accept="image/*" class="form-control-plaintext" id="id_user_icon">
               <br>
-        {% elif field.label == "User name" %}
+        {% elif field.label == "Server user name" or field.label == "Client user name" %}
               <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
               {{ field }}
+              <br>
         {% else %}
               <div style="display:none;">{{ field }}</div>
         {% endif %}

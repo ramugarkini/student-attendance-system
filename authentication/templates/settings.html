@@ -29,7 +29,7 @@
               <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
               <br><img src="/media/{{ field.value }}" style="max-width: 100px;"><br>
               <input type="file" name="favicon" accept="image/*" class="form-control-plaintext" id="id_favicon">
-        {% elif field.label == "User name" or field.label == "User icon" or field.label == "Allow host" %} 
+        {% elif field.label == "Server user name" or field.label == "User icon" or field.label == "Client user name" or field.label == "Allow host" %} 
               <div style="display:none;">{{ field }}</div>
         {% else %}
               <label for="{{ field.id_for_label }}" style="font-weight: bold;">{{ field.label }}</label>
