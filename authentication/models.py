@@ -13,11 +13,11 @@ class ConfigurationSettings(models.Model):
     server_user_name = models.CharField(max_length=255, blank=True, null=True)
     client_user_name = models.CharField(max_length=255, blank=True, null=True)
     
-    ALLOW_HOST_CHOICES = [
+    ALLOW_ACCESS_CHOICES = [
         (False, 'Off'),
         (True, 'On'),
     ]
-    allow_host = models.BooleanField(choices=ALLOW_HOST_CHOICES, default=False)
+    allow_access = models.BooleanField(choices=ALLOW_ACCESS_CHOICES, default=False)
 
     def __str__(self):
         return f'Configuration Settings - ID: {self.id}'

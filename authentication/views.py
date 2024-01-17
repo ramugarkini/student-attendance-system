@@ -68,15 +68,15 @@ def configuration(request):
     return {'items_per_page': cs.rows_per_page, 'topbar_link': cs.topbar_link, 'topbar_link_text': cs.topbar_link_text, 'sidebar_text': cs.sidebar_text, 'sidebar_icon': cs.sidebar_icon, 'favicon': cs.favicon, 'client_user_name': cs.client_user_name, 'server_user_name': cs.server_user_name, 'user_icon': cs.user_icon, 'is_local': is_local}
 
 @restrict_access_to_local
-def allow_host(request):
+def allow_access(request):
     setting = ConfigurationSettings.objects.latest('id')
 
     if request.method == 'POST':
         form = ConfigurationSettingForm(request.POST, request.FILES, instance=setting)
         if form.is_valid():
             form.save()
-            return redirect('allow_host')
+            return redirect('allow_access')
     else:
         form = ConfigurationSettingForm(instance=setting)
 
-    return render(request, 'allow_host.html', {'form': form})
+    return render(request, 'allow_access.html', {'form': form})

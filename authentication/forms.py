@@ -17,6 +17,6 @@ class ConfigurationSettingForm(forms.ModelForm):
         self.fields['server_user_name'].widget.attrs['class'] = 'form-control'
         self.fields['user_icon'].widget.attrs['class'] = 'form-control-plaintext'
         self.fields['client_user_name'].widget.attrs['class'] = 'form-control'
-        self.fields['allow_host'].widget.attrs['class'] = 'form-control'
+        self.fields['allow_access'].widget.attrs['class'] = 'form-control'
 
 

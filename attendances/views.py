@@ -59,7 +59,7 @@ def restrict_access_to_local(func):
     return wrapper
 
 
-def allow_host(func):
+def allow_access(func):
     @wraps(func)
     def wrapper(request, *args, **kwargs):
         current_site = get_current_site(request)
@@ -67,7 +67,7 @@ def allow_host(func):
 
         settings = ConfigurationSettings.objects.latest('id')
 
-        if current_site_domain != '127.0.0.1:8000' and settings.allow_host != True:
+        if current_site_domain != '127.0.0.1:8000' and settings.allow_access != True:
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -242,7 +242,7 @@ def attendance_detail_edit(request, attendance_id, attendance_timetable_detail_i
     return render(request, 'attendance_detail_edit.html', {'form': attendance_timetable_detail_form, 'attendance_timetable_detail_student_formset': attendance_timetable_detail_student_formset, 'attendance_timetable_detail': attendance_timetable_detail, 'attendance_id': attendance_id})
 
 #
-@allow_host
+@allow_access
 def face_scan(request):
     current_site = get_current_site(request)
     settings.CSRF_TRUSTED_ORIGINS = [f'https://{current_site.domain}']
