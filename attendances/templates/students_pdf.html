@@ -92,21 +92,23 @@
     <table>
         <thead>
             <tr>
-                <th>Sr. No.</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Roll Number</th>
-                <th>Student Name</th>
+                <th style="text-align: center; vertical-align: middle;">Sr. No.</th>
+                <th style="text-align: center; vertical-align: middle;">Roll Number</th>
+                <th style="text-align: center; vertical-align: middle;">Student Name</th>
+                <th style="text-align: center; vertical-align: middle;">Attendance Status</th>
+                <th style="text-align: center; vertical-align: middle;">Date</th>
+                <th style="text-align: center; vertical-align: middle;">Time</th>
             </tr>
         </thead>
         <tbody>
             {% for detail in student_details %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ detail.date|date:"d-m-Y" }}</td>
-                    <td>{{ detail.time|date:"H:i:s" }}</td>
-                    <td>{{ detail.roll_number }}</td>
-                    <td>{{ detail.student_name }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ forloop.counter }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ detail.roll_number }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ detail.student_name }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ detail.attendance_status }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ detail.date|date:"d-m-Y"|default:"-" }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ detail.time|date:"H:i:s"|default:"-" }}</td>
                 </tr>
             {% endfor %}
         </tbody>

@@ -604,7 +604,7 @@ def students_report(request, attendance_id, attendance_timetable_detail_id, pdf=
     attendance_timetable_detail_students = AttendanceTimetableDetailStudents.objects.filter(attendance_timetable_detail_id=attendance_timetable_detail_id)
 
     # Extracting student details for each attendance detail
-    student_details = [
+    student_attendance_details = [
         {
             'date': detail.date,
             'time': detail.time,
@@ -634,6 +634,28 @@ def students_report(request, attendance_id, attendance_timetable_detail_id, pdf=
         end_time = timetable_details.end_time
         subject_code = timetable_details.subject_detail.code
         subject_name = timetable_details.subject_detail.name
+
+        # Fetching student attendance details
+        student_details = Students.objects.filter(
+            department_id=attendance.department.id,
+            enrollment_year_id=attendance.enrollment_year.id,
+            section_id=attendance.section.id
+        )
+
+        for student in student_details:
+            attendance_detail = next((detail for detail in student_attendance_details if detail['student_id'] == student.id), None)
+            if attendance_detail:
+                student.attendance_status = 'Present'
+                student.date = attendance_detail['date']
+                student.time = attendance_detail['time']
+                student.student_name = attendance_detail['student_name']
+                student.roll_number = attendance_detail['roll_number']
+            else:
+                student.attendance_status = 'Absent'
+                student.date = '-'
+                student.time = '-'
+                student.student_name = student.name
+                student.roll_number = student.roll_number
 
         context = {
             'date': date,

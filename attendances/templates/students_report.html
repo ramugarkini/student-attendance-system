@@ -67,21 +67,23 @@
   <table class="table">
     <thead>
       <tr>
-        <th scope="col">#</th>
-        <th scope="col">Date</th>
-        <th scope="col">Time</th>
-        <th scope="col">Roll Number</th>
-        <th scope="col">Student Name</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">#</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">Roll Number</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">Student Name</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">Attendance Status</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">Date</th>
+        <th style="text-align: center; vertical-align: middle;" scope="col">Time</th>
       </tr>
     </thead>
     <tbody>
       {% for detail in student_details %}
           <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ detail.date|date:"d-m-Y" }}</td>
-                <td>{{ detail.time|date:"H:i:s" }}</td>
-                <td>{{ detail.roll_number }}</td>
-                <td>{{ detail.student_name }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ forloop.counter }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ detail.roll_number }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ detail.student_name }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ detail.attendance_status }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ detail.date|date:"d-m-Y"|default:"-" }}</td>
+                <td style="text-align: center; vertical-align: middle;">{{ detail.time|date:"H:i:s"|default:"-" }}</td>
           </tr>
       {% endfor %}
   </tbody>
