@@ -11,38 +11,6 @@
       max-width: 100%; /* Ensure videos and canvas are responsive */
       height: auto;
     }
-
-    .id-card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      overflow: hidden;
-      max-width: 100%; /* Adjusted for responsiveness */
-    }
-
-    .id-card-header {
-      text-align: center;
-      padding: 10px;
-      background-color: #f0f0f0;
-    }
-
-    .id-card-header img {
-      width: 100%;
-      height: auto;
-      border-radius: 50%;
-    }
-
-    .id-card-body {
-      padding: 15px;
-    }
-
-    .card-title {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-    }
-
-    .card-text {
-      margin-bottom: 5px;
-    }
   </style>
 
 <div class="card shadow">
@@ -57,17 +25,17 @@
     <div class="container">
       <div class="row">
         <!-- Left Side: Face Scan -->
-         <div class="col-lg-8">
-          <video id="video" class="img-fluid" autoplay></video>
-          <canvas id="canvas" style="display:none;"></canvas>
+        <div class="col-md-8">
+          <video id="video" width="640" height="480" autoplay></video>
+          <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
           <div id="recognizedFaceName"></div>
         </div>
 
         <!-- Right Side: Student Details -->
-        <div class="col-lg-4 mt-3 mt-lg-0">
+        <div class="col-lg-4">
           <div id="studentInfo" style="display:none;">
-            <h2 class="mt-3 mt-md-0">Student Information</h2>
-            <div id="studentDetails" class="id-card">
+            <h2>Student Information</h2>
+            <div id="studentDetails">
               <!-- Add your student details here -->
             </div>
           </div>
@@ -129,6 +97,41 @@
     function updateStudentDetails(studentInfo) {
       // Display the student information
       studentDetailsDiv.innerHTML = `
+        <style>
+          .id-card {
+              display: flex;
+              flex-direction: column;
+              border: 1px solid #ddd;
+              border-radius: 8px;
+              overflow: hidden;
+              max-width: 300px;
+          }
+
+          .id-card-header {
+              text-align: center;
+              padding: 10px;
+              background-color: #f0f0f0;
+          }
+
+          .id-card-header img {
+              width: 100%;
+              height: auto;
+              border-radius: 50%;
+          }
+
+          .id-card-body {
+              padding: 15px;
+          }
+
+          .card-title {
+              font-size: 1.5rem;
+              margin-bottom: 10px;
+          }
+
+          .card-text {
+              margin-bottom: 5px;
+          }
+          </style>
           <div class="id-card">
               <div class="id-card-header">
                   <img src="${studentInfo.image_path}" alt="Student Image" class="img-fluid rounded" style="max-height: 100%;">
