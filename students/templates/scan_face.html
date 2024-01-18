@@ -91,13 +91,30 @@
     const studentDetailsDiv = document.getElementById('studentDetails');
 
     // Function to get CSRF token from cookies
-    function getCSRFToken() {
+    /*function getCSRFToken() {
       const cookieValue = document.cookie
         .split('; ')
         .find(row => row.startsWith('csrftoken='))
         .split('=')[1];
 
       return cookieValue;
+    }*/
+
+    function getCSRFToken() {
+        // Split the cookie string into an array of key-value pairs
+        const cookiePairs = document.cookie.split('; ');
+
+        // Find the key-value pair that starts with 'csrftoken='
+        const csrfCookiePair = cookiePairs.find(row => row.startsWith('csrftoken='));
+
+        // If the 'csrftoken' key-value pair is found, split it and retrieve the token value
+        if (csrfCookiePair) {
+            const csrfToken = csrfCookiePair.split('=')[1];
+            return csrfToken;
+        }
+
+        // Return null if the 'csrftoken' key-value pair is not found
+        return null;
     }
 
     navigator.mediaDevices.getUserMedia({ video: true })

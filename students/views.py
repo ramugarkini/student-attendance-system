@@ -14,6 +14,7 @@ from authentication.models import ConfigurationSettings
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages
 
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from functools import wraps
@@ -149,12 +150,14 @@ def student_edit(request, student_id):
 #     # Return the face encoding of the first face
 #     return face_encodings[0]
 
+@csrf_exempt
 def scan_face(request):
     # Your view logic for the scan_face page
     current_site = get_current_site(request)
     settings.CSRF_TRUSTED_ORIGINS = [f'https://{current_site.domain}']
     return render(request, 'scan_face.html')
-
+    
+@csrf_exempt
 def recognize_face(request):
     if request.method == 'POST':
         try:
