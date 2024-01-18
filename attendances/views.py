@@ -51,7 +51,7 @@ def restrict_access_to_local(func):
         current_site_domain = current_site.domain
 
         # Check if the current site domain is not '127.0.0.1'
-        if current_site_domain != '127.0.0.1:8000':
+        if current_site_domain != '127.0.0.1':
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -68,7 +68,7 @@ def allow_access(func):
 
         settings = ConfigurationSettings.objects.latest('id')
 
-        if current_site_domain != '127.0.0.1:8000' and settings.allow_access != True:
+        if current_site_domain != '127.0.0.1' and settings.allow_access != True:
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -433,7 +433,7 @@ def save_attendancetimetabledetail(student_id):
         else:
             # Timetable detail instance not found
             result_message = "Timetable not created"
-            
+
             return result_message  # Indicate success if needed
 
     except Exception as e:

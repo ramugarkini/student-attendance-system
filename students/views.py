@@ -33,7 +33,7 @@ def restrict_access_to_local(func):
         current_site_domain = current_site.domain
 
         # Check if the current site domain is not '127.0.0.1'
-        if current_site_domain != '127.0.0.1:8000':
+        if current_site_domain != '127.0.0.1':
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -156,7 +156,7 @@ def scan_face(request):
     current_site = get_current_site(request)
     settings.CSRF_TRUSTED_ORIGINS = [f'https://{current_site.domain}']
     return render(request, 'scan_face.html')
-    
+
 @csrf_exempt
 def recognize_face(request):
     if request.method == 'POST':
