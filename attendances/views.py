@@ -109,41 +109,41 @@ def attendances(request):
 
 @restrict_access_to_local
 def attendance_details(request, attendance_id):
-   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
+    attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
 
-       # Ensure there is at least one instance
-   if attendance_timetable_details.exists():
-       # Initialize an empty list to store data for each attendance_timetable_detail
-       data_list = []
+    # Initialize an empty list to store data for each attendance_timetable_detail
+    data_list = []
+    # Ensure there is at least one instance
+    if attendance_timetable_details.exists():
 
-       # Loop through each attendance_timetable_detail
-       for detail in attendance_timetable_details:
-           # Fetch the related TimetableDetails
-           timetable_details = TimetableDetails.objects.filter(id=detail.timetable_detail_id).select_related('subject_detail__subject').first()
-           attendance = detail.attendance  # Assuming attendance is the ForeignKey in AttendanceTimetableDetails
+        # Loop through each attendance_timetable_detail
+        for detail in attendance_timetable_details:
+            # Fetch the related TimetableDetails
+            timetable_details = TimetableDetails.objects.filter(id=detail.timetable_detail_id).select_related('subject_detail__subject').first()
+            attendance = detail.attendance  # Assuming attendance is the ForeignKey in AttendanceTimetableDetails
 
-           if timetable_details:
-               # Extract the required columns for the current detail
-               data = {
-                   'period_no': timetable_details.period_no,
-                   'start_time': timetable_details.start_time,
-                   'end_time': timetable_details.end_time,
-                   'subject_detail__code': timetable_details.subject_detail.code,
-                   'subject_detail__name': timetable_details.subject_detail.name,
-                   'attendance_timetable_detail_id': detail.id,
-                   'date': attendance.date
-               }
+            if timetable_details:
+                # Extract the required columns for the current detail
+                data = {
+                    'period_no': timetable_details.period_no,
+                    'start_time': timetable_details.start_time,
+                    'end_time': timetable_details.end_time,
+                    'subject_detail__code': timetable_details.subject_detail.code,
+                    'subject_detail__name': timetable_details.subject_detail.name,
+                    'attendance_timetable_detail_id': detail.id,
+                    'date': attendance.date
+                }
 
-               # Append the data to the list
-               data_list.append(data)
+                # Append the data to the list
+                data_list.append(data)
 
-       # Pass the list of data to the template
-       context = {
-           'data_list': data_list,
-           'attendance_id': attendance_id
-       }
+    # Pass the list of data to the template
+    context = {
+        'data_list': data_list,
+        'attendance_id': attendance_id
+    }
 
-   return render(request, 'attendance_details.html', context)
+    return render(request, 'attendance_details.html', context)
 
 
 @restrict_access_to_local
@@ -567,41 +567,41 @@ def attendances_report(request):
 
 @restrict_access_to_local
 def attendance_details_report(request, attendance_id):
-   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
+    attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
 
-       # Ensure there is at least one instance
-   if attendance_timetable_details.exists():
-       # Initialize an empty list to store data for each attendance_timetable_detail
-       data_list = []
+    # Initialize an empty list to store data for each attendance_timetable_detail
+    data_list = []
+    # Ensure there is at least one instance
+    if attendance_timetable_details.exists():
 
-       # Loop through each attendance_timetable_detail
-       for detail in attendance_timetable_details:
-           # Fetch the related TimetableDetails
-           timetable_details = TimetableDetails.objects.filter(id=detail.timetable_detail_id).select_related('subject_detail__subject').first()
-           attendance = detail.attendance
+        # Loop through each attendance_timetable_detail
+        for detail in attendance_timetable_details:
+            # Fetch the related TimetableDetails
+            timetable_details = TimetableDetails.objects.filter(id=detail.timetable_detail_id).select_related('subject_detail__subject').first()
+            attendance = detail.attendance
 
-           if timetable_details:
-               # Extract the required columns for the current detail
-               data = {
-                   'period_no': timetable_details.period_no,
-                   'start_time': timetable_details.start_time,
-                   'end_time': timetable_details.end_time,
-                   'subject_detail__code': timetable_details.subject_detail.code,
-                   'subject_detail__name': timetable_details.subject_detail.name,
-                   'attendance_timetable_detail_id': detail.id,
-                   'date': attendance.date
-               }
+            if timetable_details:
+                # Extract the required columns for the current detail
+                data = {
+                    'period_no': timetable_details.period_no,
+                    'start_time': timetable_details.start_time,
+                    'end_time': timetable_details.end_time,
+                    'subject_detail__code': timetable_details.subject_detail.code,
+                    'subject_detail__name': timetable_details.subject_detail.name,
+                    'attendance_timetable_detail_id': detail.id,
+                    'date': attendance.date
+                }
 
-               # Append the data to the list
-               data_list.append(data)
+                # Append the data to the list
+                data_list.append(data)
 
-       # Pass the list of data to the template
-       context = {
-           'data_list': data_list,
-           'attendance_id': attendance_id
-       }
+    # Pass the list of data to the template
+    context = {
+        'data_list': data_list,
+        'attendance_id': attendance_id
+    }
 
-   return render(request, 'attendance_details_report.html', context)
+    return render(request, 'attendance_details_report.html', context)
 
 def students_report(request, attendance_id, attendance_timetable_detail_id, pdf=0):
     attendance_timetable_detail_students = AttendanceTimetableDetailStudents.objects.filter(attendance_timetable_detail_id=attendance_timetable_detail_id)
