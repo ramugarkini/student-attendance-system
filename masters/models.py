@@ -25,7 +25,7 @@ class EnrollmentYears(models.Model):
     academic_year = models.ForeignKey(AcademicYears, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.code} - {self.year} - {self.academic_year}"
+        return f"{self.year} - {self.academic_year}"
 
 class Sections(models.Model):
     id = models.AutoField(primary_key=True)
