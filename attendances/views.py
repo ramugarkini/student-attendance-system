@@ -82,9 +82,9 @@ def attendances(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_attendances = Attendances.objects.filter(department__name__icontains=search_query) | Attendances.objects.filter(enrollment_year__year__icontains=search_query).order_by('id')
+        all_attendances = Attendances.objects.filter(department__name__icontains=search_query) | Attendances.objects.filter(enrollment_year__year__icontains=search_query).order_by('-date')
     else:
-        all_attendances = Attendances.objects.all().order_by('id')
+        all_attendances = Attendances.objects.all().order_by('-date')
 
     settings = ConfigurationSettings.objects.latest('id')
     items_per_page = settings.rows_per_page
@@ -109,7 +109,7 @@ def attendances(request):
 
 @restrict_access_to_local
 def attendance_details(request, attendance_id):
-   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id)
+   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
 
        # Ensure there is at least one instance
    if attendance_timetable_details.exists():
@@ -464,6 +464,7 @@ This is a system-generated email. Please do not reply.
         recipient_list = [student_instance.email]
         # recipient_list = ['ramuasece@gmail.com']
         # cc_list = ['ramu.garkini@gmail.com']
+            # cc=cc_list,
 
         # Customize the sender email and other parameters as needed
         sender_email = 'noreply.322136410122@gmail.com'
@@ -473,7 +474,6 @@ This is a system-generated email. Please do not reply.
             message,
             sender_email,
             recipient_list,
-            cc=cc_list,
             fail_silently=False,  # Set to True to suppress exceptions (useful during development)
         )
 
@@ -543,7 +543,7 @@ def api_send_email(request):
 @restrict_access_to_local
 def attendances_report(request):
     page = request.GET.get('page', 1)
-    all_attendances = Attendances.objects.all()
+    all_attendances = Attendances.objects.all().order_by('-date')
 
     settings = ConfigurationSettings.objects.latest('id')
     items_per_page = settings.rows_per_page
@@ -567,7 +567,7 @@ def attendances_report(request):
 
 @restrict_access_to_local
 def attendance_details_report(request, attendance_id):
-   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id)
+   attendance_timetable_details = AttendanceTimetableDetails.objects.filter(attendance_id=attendance_id).order_by('timetable_detail__period_no')
 
        # Ensure there is at least one instance
    if attendance_timetable_details.exists():
@@ -643,7 +643,7 @@ def students_report(request, attendance_id, attendance_timetable_detail_id, pdf=
             department_id=attendance.department.id,
             enrollment_year_id=attendance.enrollment_year.id,
             section_id=attendance.section.id
-        )
+        ).order_by('roll_number')
 
         for student in student_details:
             attendance_detail = next((detail for detail in student_attendance_details if detail['student_id'] == student.id), None)

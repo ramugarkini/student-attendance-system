@@ -44,9 +44,9 @@ def departments(request):
     # Fetch all departments or filter by search query
     search_query = request.GET.get('search', '')
     if search_query:
-        all_departments = Departments.objects.filter(name__icontains=search_query) | Departments.objects.filter(code__icontains=search_query)
+        all_departments = Departments.objects.filter(name__icontains=search_query) | Departments.objects.filter(code__icontains=search_query).order_by('code')
     else:
-        all_departments = Departments.objects.all()
+        all_departments = Departments.objects.all().order_by('code')
 
     # Set the number of items per page
     settings = ConfigurationSettings.objects.latest('id')
@@ -167,7 +167,7 @@ def academic_years(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_academic_years = AcademicYears.objects.filter(academic_year__icontains=search_query)
+        all_academic_years = AcademicYears.objects.filter(academic_year__icontains=search_query).order_by('academic_year')
     else:
         all_academic_years = AcademicYears.objects.all().order_by('academic_year')  # Order by year in descending order
 
@@ -227,9 +227,9 @@ def sections(request):
 
     search_query = request.GET.get('search', '')
     if search_query:
-        all_sections = Sections.objects.filter(name__icontains=search_query)
+        all_sections = Sections.objects.filter(name__icontains=search_query).order_by('name')
     else:
-        all_sections = Sections.objects.all()
+        all_sections = Sections.objects.all().order_by('name')
 
     settings = ConfigurationSettings.objects.latest('id')
     items_per_page = settings.rows_per_page
@@ -286,9 +286,9 @@ def subjects(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_subjects = Subjects.objects.filter(department__name__icontains=search_query) | Subjects.objects.filter(academic_year__academic_year__icontains=search_query)
+        all_subjects = Subjects.objects.filter(department__name__icontains=search_query) | Subjects.objects.filter(academic_year__academic_year__icontains=search_query).order_by('academic_year__academic_year')
     else:
-        all_subjects = Subjects.objects.all()
+        all_subjects = Subjects.objects.all().order_by('academic_year__academic_year')
 
     subjects_with_count = []
 
@@ -395,9 +395,9 @@ def timetables(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_timetables = Timetables.objects.filter(department__name__icontains=search_query) | Timetables.objects.filter(enrollment_year__year__icontains=search_query)
+        all_timetables = Timetables.objects.filter(department__name__icontains=search_query) | Timetables.objects.filter(enrollment_year__year__icontains=search_query).order_by('enrollment_year__academic_year__academic_year')
     else:
-        all_timetables = Timetables.objects.all()
+        all_timetables = Timetables.objects.all().order_by('enrollment_year__academic_year__academic_year')
 
     settings = ConfigurationSettings.objects.latest('id')
     items_per_page = settings.rows_per_page
@@ -473,9 +473,9 @@ def holidays(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_holidays = Holidays.objects.filter(year__icontains=search_query)
+        all_holidays = Holidays.objects.filter(year__icontains=search_query).order_by('-year')
     else:
-        all_holidays = Holidays.objects.all()
+        all_holidays = Holidays.objects.all().order_by('-year')
 
     holidays_with_count = []
 

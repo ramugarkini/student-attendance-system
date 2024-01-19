@@ -49,9 +49,9 @@ def students(request):
     page = request.GET.get('page', 1)
     search_query = request.GET.get('search', '')
     if search_query:
-        all_students = Students.objects.filter(name__icontains=search_query) | Students.objects.filter(roll_number__icontains=search_query) | Students.objects.filter(department__name__icontains=search_query) | Students.objects.filter(enrollment_year__year__icontains=search_query)
+        all_students = Students.objects.filter(name__icontains=search_query) | Students.objects.filter(roll_number__icontains=search_query) | Students.objects.filter(department__name__icontains=search_query) | Students.objects.filter(enrollment_year__year__icontains=search_query).order_by('roll_number')
     else:
-        all_students = Students.objects.all()
+        all_students = Students.objects.all().order_by('roll_number')
 
     settings = ConfigurationSettings.objects.latest('id')
     items_per_page = settings.rows_per_page
