@@ -19,4 +19,6 @@ urlpatterns = [
     path('attendances_report/', views.attendances_report, name='attendances_report'),
     path('attendance_details_report/<int:attendance_id>/', views.attendance_details_report, name='attendance_details_report'),
     path('students_report/<int:attendance_id>/<int:attendance_timetable_detail_id>/<int:pdf>', views.students_report, name='students_report'),
+
+    path('date_range_report/', views.date_range_report, name='date_range_report'),
 ]

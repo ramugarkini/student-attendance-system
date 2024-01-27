@@ -18,7 +18,7 @@ def restrict_access_to_local(func):
         print(get_current_site(request))
 
         # Check if the current site domain is not '127.0.0.1'
-        if current_site_domain != '127.0.0.1':
+        if current_site_domain not in ('127.0.0.1'):
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 

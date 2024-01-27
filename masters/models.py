@@ -85,7 +85,7 @@ class TimetableDetails(models.Model):
 
     def __str__(self):
         # return f"TimetableDetails for {self.timetable} - Period {self.period_no} - {self.subject_detail.name if self.subject_detail else 'None'}"
-        return f"{self.period_no}. {self.subject_detail.code} ({self.start_time} - {self.end_time})"
+        return f"{self.timetable.get_weekday_display()} | {self.period_no}. {self.subject_detail.code} ({self.start_time} - {self.end_time})"
 
 class Holidays(models.Model):
     id = models.AutoField(primary_key=True)

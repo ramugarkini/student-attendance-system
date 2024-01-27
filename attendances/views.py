@@ -14,7 +14,7 @@ from django.utils import timezone
 from datetime import datetime
 import pytz
 
-from masters.models import Timetables, TimetableDetails, Departments, EnrollmentYears, Sections
+from masters.models import Timetables, TimetableDetails, Departments, EnrollmentYears, Sections, Subjects, SubjectDetails
 from students.models import Students
 import face_recognition
 import numpy as np
@@ -37,6 +37,8 @@ from django.urls import reverse
 from django.utils.html import escape
 from django.db import IntegrityError
 
+from django.db.models import Count
+
 import logging
 from django.core.files.base import ContentFile
 
@@ -51,7 +53,7 @@ def restrict_access_to_local(func):
         current_site_domain = current_site.domain
 
         # Check if the current site domain is not '127.0.0.1'
-        if current_site_domain != '127.0.0.1':
+        if current_site_domain not in ('127.0.0.1'):
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -68,7 +70,7 @@ def allow_access(func):
 
         settings = ConfigurationSettings.objects.latest('id')
 
-        if current_site_domain != '127.0.0.1' and settings.allow_access != True:
+        if current_site_domain not in ('127.0.0.1') and settings.allow_access != True:
             # return HttpResponseForbidden("Access Denied")
             return redirect('access_denied')
 
@@ -147,6 +149,7 @@ def attendance_details(request, attendance_id):
 
 
 @restrict_access_to_local
+@csrf_exempt
 def attendance_edit(request, attendance_id):
     attendance = get_object_or_404(Attendances, pk=attendance_id) if attendance_id != 0 else Attendances()
     attendance_timetable_details = attendance.attendancetimetabledetails_set.all() if attendance_id != 0 else None
@@ -195,6 +198,7 @@ def attendance_edit(request, attendance_id):
     return render(request, 'attendance_edit.html', {'form': attendance_form, 'attendance_timetable_detail_formset': attendance_timetable_detail_formset, 'attendance': attendance})
 
 @restrict_access_to_local
+@csrf_exempt
 def attendance_detail_edit(request, attendance_id, attendance_timetable_detail_id):
     attendance_timetable_detail = get_object_or_404(AttendanceTimetableDetails, pk=attendance_timetable_detail_id) if attendance_timetable_detail_id != 0 else AttendanceTimetableDetails(attendance_id=attendance_id)
     attendance_timetable_detail_students = attendance_timetable_detail.attendancetimetabledetailstudents_set.all() if attendance_timetable_detail_id != 0 else None
@@ -413,6 +417,9 @@ def save_attendancetimetabledetail(student_id):
 
                 if existing_attendancetabledetail_student:
                     attendancetabledetail_student_instance = existing_attendancetabledetail_student
+
+                    send_email(student_id, subject_detail_name, attendancetabledetail_student_instance.date.strftime('%d-%m-%Y'), attendancetabledetail_student_instance.time.strftime('%H:%M:%S'))
+                    
                     return f"Existing attendance. Date and Time: {attendancetabledetail_student_instance.date.strftime('%d-%m-%Y')} {attendancetabledetail_student_instance.time.strftime('%H:%M:%S')}. Subject: {subject_detail_name}"
 
                 else:
@@ -701,3 +708,131 @@ def render_to_pdf(template_path, context_dict):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + escape(html) + '</pre>')
     return response
+
+
+# @restrict_access_to_local
+@csrf_exempt
+def date_range_report(request):
+    attendances = Attendances.objects.all().order_by('-date')
+    departments = Departments.objects.all()
+    enrollment_years = EnrollmentYears.objects.all()
+    sections = Sections.objects.all()
+    subjects = SubjectDetails.objects.all()
+
+    context = {
+        'attendances': attendances,
+        'departments': departments,
+        'enrollment_years': enrollment_years,
+        'sections': sections,
+        'subjects': subjects,
+    }
+
+    if request.method == 'POST':
+        # Extract parameters from the form submission
+        from_date = request.POST.get('from_date')
+        to_date = request.POST.get('to_date')
+        department_id = request.POST.get('department')
+        section_id = request.POST.get('section')
+        enrollment_year_id = request.POST.get('enrollment_year')
+        subject_id = request.POST.get('subject')
+        data = []
+
+        # Perform filtering based on the form parameters
+        # attendances = Attendances.objects.filter(date__range=[from_date, to_date])
+        attendances = AttendanceTimetableDetailStudents.objects.filter(
+            attendance_timetable_detail__attendance__date__range=[from_date, to_date]
+        )
+        if department_id:
+            attendances = attendances.filter(attendance_timetable_detail__attendance__department_id=department_id)
+        if section_id:
+            attendances = attendances.filter(attendance_timetable_detail__attendance__section_id=section_id)
+        if enrollment_year_id:
+            attendances = attendances.filter(attendance_timetable_detail__attendance__enrollment_year_id=enrollment_year_id)
+
+        # Additional filtering based on subject_id if needed
+        if subject_id:
+            attendances = attendances.filter(
+                attendance_timetable_detail__timetable_detail__subject_detail__id=subject_id
+            )
+
+        student_attendance_details = [
+            {
+                'student_id': detail.student.id,
+                'student_name': detail.student.name,
+                'roll_number': detail.student.roll_number,
+            }
+            for detail in attendances
+        ]
+
+        student_details = Students.objects.filter(
+            department_id=department_id,
+            enrollment_year_id=enrollment_year_id,
+            section_id=section_id
+        ).order_by('roll_number')
+
+        subject_name = SubjectDetails.objects.filter(id=subject_id).first().name
+
+        total_classes = get_total_classes(department_id, from_date, to_date, subject_id, enrollment_year_id, section_id)
+
+        for student in student_details:
+            attendance_detail = next((detail for detail in student_attendance_details if detail['student_id'] == student.id), None)
+            if attendance_detail:
+                student.subject_name = subject_name
+                student.student_name = student.name
+                student.roll_number = student.roll_number
+                student.total_classes = total_classes
+            else:
+                student.subject_name = subject_name
+                student.student_name = student.name
+                student.roll_number = student.roll_number
+                student.total_classes = total_classes
+
+
+        # Fetch related data for display
+
+        # Collect unique students and count their attendance
+        students_data = {}
+        for attendance in attendances:
+            student_name = attendance.student.name
+            subject_name = attendance.attendance_timetable_detail.timetable_detail.subject_detail.name
+            key = (student_name, subject_name)
+
+            if key not in students_data:
+                students_data[key] = {'total_classes': 0, 'classes_present': 0}
+            students_data[key]['total_classes'] += 1
+
+        # Calculate the classes present for each student and subject
+        for attendance in attendances:
+            student_name = attendance.student.name
+            subject_name = attendance.attendance_timetable_detail.timetable_detail.subject_detail.name
+            key = (student_name, subject_name)
+
+            students_data[key]['classes_present'] += 1
+
+        # Convert data to the desired format for display
+        for (student_name, subject_name), attendance_data in students_data.items():
+            student = next((student for student in student_details if student.name == student_name), None)
+            
+            if student:
+                student.classes_present = attendance_data['classes_present']
+            else:
+                # Create a new student object if not found in student_details
+                student.classes_present = attendance_data['classes_present']
+
+        
+
+        # Add data to the context
+        context['data'] = student_details
+
+    return render(request, 'date_range_report.html', context)
+
+def get_total_classes(department_id, from_date, to_date, subject_id, enrollment_year_id, section_id):
+    total_classes_attendances_table_details = AttendanceTimetableDetails.objects.filter(
+        timetable_detail__subject_detail_id=subject_id,
+        attendance__department_id=department_id,
+        attendance__section_id=section_id,
+        attendance__enrollment_year_id=enrollment_year_id,
+        attendance__date__range=[from_date, to_date],
+    ).count()
+
+    return total_classes_attendances_table_details

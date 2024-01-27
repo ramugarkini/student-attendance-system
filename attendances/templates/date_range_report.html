@@ -1,0 +1,208 @@
+<!-- masters/templates/attendance_details_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Date Range Report{% endblock %}
+
+{% block content %}
+
+<div class="card shadow">
+  <div class="card-header">
+    <div class="d-sm-flex align-items-center justify-content-between">
+        <h3 class="m-0 font-weight-bold text-primary">Date Range Report</h3>
+  </div>
+</div>
+
+<div class="card-body">
+  <form method="post" action="" enctype="multipart/form-data" style="flex-grow: 1;">
+    {% csrf_token %}
+
+    <div class="row">
+      <div class="col-md-3">
+        <!-- From Date -->
+        <label for="from_date">From Date:</label>
+        <input type="date" name="from_date" id="from_date" class="form-control" autocomplete="off" required value="{{ request.POST.from_date }}">
+      </div>
+
+      <div class="col-md-3">
+        <!-- To Date -->
+        <label for="to_date">To Date:</label>
+        <input type="date" name="to_date" id="to_date" class="form-control" autocomplete="off" required value="{{ request.POST.to_date }}">
+      </div>
+
+      <div class="col-md-3">
+        <!-- Department Dropdown -->
+        <label for="id_department">Department:</label>
+        <select name="department" id="id_department" class="form-control">
+            {% for department in departments %}
+              <option value="{{ department.id }}" {% if request.POST.department == department.id %} selected {% endif %}>{{ department.name }}</option>
+            {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <!-- Section Dropdown -->
+        <label for="id_section">Section:</label>
+        <select name="section" id="id_section" class="form-control">
+            {% for section in sections %}
+              <option value="{{ section.id }}">{{ section.name }}</option>
+
+            {% endfor %}
+        </select>
+      </div>
+
+    </div>
+
+    <div class="row mt-3">
+
+      <div class="col-md-6">
+        <!-- Enrollment Year Dropdown -->
+        <label for="id_enrollment_year">Enrollment Year:</label>
+        <select name="enrollment_year" id="id_enrollment_year" class="form-control">
+            {% for year in enrollment_years %}
+                <option value="{{ year.id }}">{{ year.year}} | {{ year.academic_year.academic_year }}</option>
+            {% endfor %}
+        </select>
+      </div>
+
+      
+
+      <div class="col-md-6">
+        <!-- Subject Dropdown -->
+        <label for="subject">Subject:</label>
+        <select name="subject" id="subject" class="form-control subject_detail" required>
+            {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
+            {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Save/Update, Delete, and Cancel Buttons -->
+    <div class="button-row mt-1">
+      <button class="btn btn-success" type="submit">Generate Report</button>
+    </div>
+
+  </form>
+</div>
+
+<div class="card-header">
+  {% if data %}
+      <table class="table">
+          <thead>
+              <tr>
+                  <th style="text-align: center; vertical-align: middle;">Student</th>
+                  <th style="text-align: center; vertical-align: middle;">Roll Number</th>
+                  <th style="text-align: center; vertical-align: middle;">Subject</th>
+                  <th style="text-align: center; vertical-align: middle;">Total Classes</th>
+                  <th style="text-align: center; vertical-align: middle;">No of Classes Present</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for entry in data %}
+                  <tr>
+                      <td style="text-align: center; vertical-align: middle;">{{ entry.student_name }}</td>
+                      <td style="text-align: center; vertical-align: middle;">{{ entry.roll_number }}</td>
+                      <td style="text-align: center; vertical-align: middle;">{{ entry.subject_name }}</td>
+                      <td style="text-align: center; vertical-align: middle;">{{ entry.total_classes|default:"0" }}</td>
+                      <td style="text-align: center; vertical-align: middle;">{{ entry.classes_present|default:"0" }}</td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  {% elif request.method == 'POST' %}
+      <p>No data available.</p>
+  {% endif %}
+
+</div>
+
+{% load static %}
+<script src="{% static 'js/jquery-3.6.4.min.js' %}"></script>
+<script>
+  function subjects(onChangeDeptEy=1, subjectDetailSelector=$('.subject_detail')) {
+    try {
+      var departmentId = $('#id_department').val();
+      var enrollmentYearId = $('#id_enrollment_year').val();
+      // Assuming subjectDetailSelector is meant to be a jQuery object
+      var subjectDetailId = 0;
+
+      /*if (subjectDetailSelector.length > 0) {
+          if (typeof subjectDetailSelector.val === 'function') {
+              subjectDetailId = subjectDetailSelector.val() || 0;
+          }
+      }*/
+
+      if (onChangeDeptEy == 1) {
+        subjectDetailId = 0;
+      }
+
+      if (!departmentId || !enrollmentYearId) {
+          return;
+      }
+
+
+      $.ajax({
+          url: '/masters/api/subjects/',
+          data: { department: departmentId, enrollment_year: enrollmentYearId },
+          dataType: 'json',
+          success: function(data) {
+              var subjectDetailsDropdown = subjectDetailSelector;
+              subjectDetailsDropdown.empty();
+
+
+              $.each(data, function(index, subject) {
+                  var option = '<option value="' + subject.id + '"';
+                      
+                  // Check if the current subject id matches the selected value
+                  /*if (subject.id == subjectDetailId) {
+                      option += ' selected';
+                  }*/
+
+                  option += '>' + subject.name + '</option>';
+                  
+                  subjectDetailsDropdown.append(option);
+              });
+
+              if (subjectDetailId == 0) {
+                  subjectDetailsDropdown.prepend('<option value="" selected="">---------</option>');
+              } else {
+                  subjectDetailsDropdown.prepend('<option value="">---------</option>');
+              }
+          },
+          error: function(error) {
+              console.log('Error fetching subjects:', error);
+          }
+      });
+    } catch (error) {
+        console.log('An error occurred:', error);
+    }
+  }
+
+  $(document).ready(function() {
+    var sectionValue = "{{ request.POST.section }}";
+    if (sectionValue) {
+        $("#id_section").val(sectionValue);
+    }
+
+    var enrollmentYearValue = "{{ request.POST.enrollment_year }}";
+    if (enrollmentYearValue) {
+        $("#id_enrollment_year").val(enrollmentYearValue);
+    }
+
+    // Event listener for department and academic year dropdown changes
+    $('#id_department, #id_enrollment_year').on('change', function() {
+      var onChangeDeptEy = 1;
+      subjects(onChangeDeptEy, $('.subject_detail'));
+    });
+
+    subjects(0, $('.subject_detail'));
+
+    
+  });
+
+</script>
+
+
+{% endblock %}
+

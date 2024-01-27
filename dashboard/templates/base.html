@@ -103,7 +103,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Menu :</h6>
                         <a class="collapse-item" href="{% url 'students' %}">Students</a>
-                        <a class="collapse-item" href="{% url 'scan_face' %}">Scan Face</a>
+                        <a class="collapse-item" href="{% url 'scan_face' %}">Scan Face (verification)</a>
                         <!-- <a class="collapse-item" href="{% url 'holidays' %}">Holidays</a> -->
                         <!-- <a class="collapse-item" href="utilities-animation.html">Animations</a>
                         <a class="collapse-item" href="utilities-other.html">Other</a> -->
@@ -141,12 +141,36 @@
                 </div>
             </li>
 
-            <!-- Nav Item - Charts -->
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Reports
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
+                    aria-expanded="true" aria-controls="collapseReports">
+                    <i class="fas fa-fw fa-database"></i>
+                    <span>Reports</span>
+                </a>
+                <div id="collapseReports" class="collapse" aria-labelledby="headingReports" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Menu :</h6>
+                        <a class="collapse-item" href="{% url 'attendances_report' %}">Daywise Report</a>
+                        <a class="collapse-item" href="{% url 'date_range_report' %}">Date Range Report</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - Charts -->
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="{% url 'attendances_report' %}">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Reports</span></a>
-            </li>
+            </li> -->
 
             <!-- Nav Item - Tables -->
             <!-- <li class="nav-item">
